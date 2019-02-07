@@ -2,6 +2,8 @@ package com.troika.emall.service;
 
 import com.troika.emall.domain.ProductOrder;
 import com.troika.emall.repository.ProductOrderRepository;
+import com.troika.emall.security.AuthoritiesConstants;
+import com.troika.emall.security.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +48,11 @@ public class ProductOrderService {
     @Transactional(readOnly = true)
     public Page<ProductOrder> findAll(Pageable pageable) {
         log.debug("Request to get all ProductOrders");
-        return productOrderRepository.findAll(pageable);
+        if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.ADMIN)) {
+            return productOrderRepository.findAll(pageable);
+        } else
+            return productOrderRepository.findAllByCustomerUserLogin(
+                SecurityUtils.getCurrentUserLogin().get(), pageable);
     }
 
 
